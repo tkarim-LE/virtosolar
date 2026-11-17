@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PV Tender Winners</title>
+<meta name="description" content="European firms that just won a public contract to build solar PV, ranked, with open PV tenders and a draft email for each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Sampled from virto.solar: royal blue, deep navy, orange calls to action, Poppins, 6px corners, caps buttons. */
+  :root {
+    --ink: #141414;
+    --ink-2: #424242;
+    --ink-3: #676c80;
+    --night: #0b1430;
+    --blue: #0b31ad;
+    --blue-hover: #0a2891;
+    --orange: #f97316;
+    --orange-hover: #ea620a;
+    --teal: #22b8d6;
+    --line: #e3e6ef;
+    --wash: #f4f6fb;
+    --card: #ffffff;
+    --high: #0b31ad;
+    --med: #1d9bbd;
+    --low: #b5bacb;
+    --radius: 10px;
+    --btn-radius: 6px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--wash);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+
+  /* Hero */
+  .hero {
+    position: relative; overflow: hidden;
+    background: linear-gradient(160deg, var(--night) 0%, #0c2275 55%, var(--blue) 100%);
+    color: #fff;
+    padding: 0 16px 56px;
+  }
+  .hero svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .55; }
+  .wrap { max-width: 1200px; margin: 0 auto; position: relative; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 0 48px; }
+  .byline { font-size: 14px; color: rgba(255,255,255,.75); }
+  .byline b { color: #fff; font-weight: 600; }
+  .top-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .pill {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--btn-radius); cursor: pointer;
+    padding: 10px 18px; font-weight: 700; font-size: 13px; letter-spacing: .8px; text-transform: uppercase;
+    border: 2px solid transparent; text-decoration: none; white-space: nowrap; flex: none;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .pill.primary { background: var(--orange); color: #fff; }
+  .pill.primary:hover { background: var(--orange-hover); }
+  .pill.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.4); }
+  .pill.ghost:hover { border-color: #fff; }
+  .pill.light { background: #fff; color: var(--blue); border-color: var(--line); }
+  .pill.light:hover { border-color: var(--blue); }
+  h1 { font-size: clamp(34px, 5.6vw, 62px); font-weight: 800; letter-spacing: -1.6px; line-height: 1.06; margin: 0 0 20px; max-width: 860px; }
+  .lede { font-size: clamp(16px, 2vw, 19px); line-height: 1.6; color: rgba(255,255,255,.85); max-width: 740px; margin: 0 0 40px; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .stat { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius); padding: 18px 20px; }
+  .stat .n { font-size: 32px; font-weight: 700; letter-spacing: -.8px; }
+  .stat .l { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 2px; }
+
+  /* Filters */
+  .filters { position: sticky; top: 0; z-index: 5; background: rgba(244,246,251,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); padding: 12px 16px; }
+  .filters .wrap { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .field { background: #fff; border: 1px solid var(--line); border-radius: var(--btn-radius); padding: 8px 12px; font-size: 14px; outline: none; max-width: 100%; }
+  .field:focus { border-color: var(--blue); }
+  #q { flex: 1 1 200px; min-width: 0; }
+  .chips { display: flex; gap: 6px; }
+  .chip { border: 1px solid var(--line); background: #fff; border-radius: var(--btn-radius); padding: 7px 12px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .chip[aria-pressed="true"] { border-color: var(--blue); background: #e9eefc; color: var(--blue); font-weight: 600; }
+  .count { margin-left: auto; font-size: 14px; color: var(--ink-3); white-space: nowrap; }
+
+  /* List */
+  main { padding: 24px 16px 40px; }
+  .list { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .row, .head { display: grid; grid-template-columns: 96px minmax(0, 2.3fr) minmax(0, 2.6fr) minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; align-items: center; padding: 16px 20px; }
+  .head { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); background: var(--wash); border-bottom: 1px solid var(--line); }
+  .head button { all: unset; cursor: pointer; }
+  .head button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .head [aria-sort="descending"] button::after { content: " ↓"; }
+  .head [aria-sort="ascending"] button::after { content: " ↑"; }
+  .row { border-bottom: 1px solid var(--line); cursor: pointer; transition: background .12s; }
+  .row:last-child { border-bottom: 0; }
+  .row:hover, .row:focus-visible { background: #f6f8ff; outline: none; }
+  .row.active { background: #edf1fd; }
+  .name { font-weight: 600; overflow-wrap: anywhere; }
+  .sub { font-size: 13px; color: var(--ink-3); margin-top: 2px; overflow-wrap: anywhere; }
+  .clip { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .badge.High .dot { background: var(--high); } .badge.High { color: var(--high); }
+  .badge.Medium .dot { background: var(--med); } .badge.Medium { color: #157f9c; }
+  .badge.Low .dot { background: var(--low); } .badge.Low { color: var(--ink-3); }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: #e9eefc; color: var(--blue); margin-left: 6px; vertical-align: 1px; }
+  .tag.new { background: #fff1e6; color: #c2540a; }
+  .tag.teal { background: #e3f6fa; color: #127893; }
+  .tag:first-child { margin-left: 0; }
+  .bar { height: 6px; background: #e8ebf4; border-radius: 99px; overflow: hidden; margin-top: 6px; max-width: 140px; }
+  .bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), var(--teal)); }
+  .why { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+  .empty { padding: 48px 20px; text-align: center; color: var(--ink-3); }
+
+  /* Open tenders */
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 40px 0 12px; flex-wrap: wrap; }
+  .section-head h2 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.4px; }
+  .t-row { display: grid; grid-template-columns: 120px minmax(0, 1.4fr) minmax(0, 2.4fr) 90px; gap: 16px; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  .t-row:last-child { border-bottom: 0; }
+  .t-row a { font-size: 13px; font-weight: 600; }
+  .due { font-weight: 600; }
+  .due.soon { color: #c2540a; }
+  .more { display: block; width: 100%; padding: 14px; background: var(--wash); border: 0; border-top: 1px solid var(--line); color: var(--blue); font-weight: 600; cursor: pointer; }
+
+  /* Drawer */
+  .scrim { position: fixed; inset: 0; background: rgba(11,20,48,.5); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(640px, 100%); background: #fff; z-index: 21; transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; }
+  .drawer.open { transform: none; box-shadow: -20px 0 60px rgba(11,20,48,.2); }
+  .d-head { background: linear-gradient(160deg, var(--night), var(--blue)); color: #fff; padding: 22px 24px; display: flex; gap: 16px; align-items: flex-start; }
+  .d-head h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.4px; overflow-wrap: anywhere; }
+  .d-head .sub { color: rgba(255,255,255,.75); }
+  .d-head .links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; }
+  .d-head .links a { color: #9fe3f2; }
+  .close { margin-left: auto; background: rgba(255,255,255,.12); border: 0; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; line-height: 1; flex: none; }
+  .d-body { padding: 24px; overflow-y: auto; flex: 1; }
+  .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .fact { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+  .fact .n { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+  .fact .l { font-size: 12px; color: var(--ink-3); }
+  h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; margin: 0 0 10px; }
+  .deal { border-left: 3px solid var(--teal); padding: 4px 0 4px 14px; margin-bottom: 14px; }
+  .deal.unclear { border-left-color: var(--low); }
+  .deal .name { font-size: 14px; font-weight: 500; }
+  .deal a { font-size: 13px; }
+  .block { margin-bottom: 24px; }
+  .compose { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-top: 8px; }
+  .compose label { display: block; font-size: 12px; color: var(--ink-3); padding: 12px 16px 0; }
+  .compose input, .compose textarea { width: 100%; border: 0; outline: none; padding: 4px 16px 12px; background: transparent; resize: vertical; line-height: 1.6; font-size: 14px; }
+  .compose input { font-weight: 600; border-bottom: 1px solid var(--line); }
+  .compose textarea { min-height: 340px; }
+  .actions { display: flex; gap: 10px; padding: 14px 16px; background: var(--wash); border-top: 1px solid var(--line); align-items: center; flex-wrap: wrap; }
+  .copied { font-size: 13px; color: var(--blue); opacity: 0; transition: opacity .2s; }
+  .copied.show { opacity: 1; }
+
+  footer { padding: 0 16px 40px; font-size: 13px; color: var(--ink-3); }
+  footer .wrap { border-top: 1px solid var(--line); padding-top: 20px; line-height: 1.6; }
+
+  @media (max-width: 860px) {
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .head { display: none; }
+    .row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "firm pri" "deal deal" "wins val"; row-gap: 10px; }
+    .c-pri { grid-area: pri; } .c-firm { grid-area: firm; } .c-deal { grid-area: deal; } .c-wins { grid-area: wins; } .c-val { grid-area: val; text-align: right; }
+    .c-val .bar { margin-left: auto; }
+    .t-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "buyer due" "title title" "link link"; row-gap: 6px; }
+    .t-due { grid-area: due; text-align: right; } .t-buyer { grid-area: buyer; } .t-title { grid-area: title; } .t-link { grid-area: link; }
+    .count { margin-left: 0; width: 100%; }
+    .topbar { padding-bottom: 32px; flex-wrap: wrap; }
+    .topbar .pill { padding: 8px 12px; font-size: 12px; }
+    .filters .field { flex: 1 1 140px; }
+  }
+  @media (max-width: 520px) {
+    .fact { padding: 10px 12px; }
+    .fact .n { font-size: 17px; }
+    .chips { flex-wrap: wrap; }
+    .stat .n { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<section class="hero">
+  <svg class="lines" viewBox="0 0 1440 560" preserveAspectRatio="none" aria-hidden="true">
+    <polyline points="900,-10 1010,140 1440,140" fill="none" stroke="#22b8d6" stroke-width="2"/>
+    <polyline points="1160,560 1300,330 1440,250" fill="none" stroke="#22b8d6" stroke-width="2"/>
+  </svg>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="byline">Built for the <b id="client-name"></b> team by <b id="firm-name"></b></div>
+      <div class="top-actions">
+        <button class="pill ghost" id="copy-all" type="button">Copy all drafts</button>
+        <button class="pill ghost" id="csv" type="button">Download CSV</button>
+      </div>
+    </div>
+    <h1>Installers that just won a public solar contract.</h1>
+    <p class="lede">A public PV contract comes with a deadline for layouts, string plans and a bill of materials the buyer will sign off. These are the European firms that won one in the last 12 months. The list comes from the EU tender database each time you open this page, ranked by how recent, frequent and large each firm's wins are, with a draft email for each.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+</section>
+
+<div class="filters">
+  <div class="wrap">
+    <input class="field" id="q" type="search" placeholder="Search firms, buyers or towns" aria-label="Search firms, buyers or towns">
+    <select class="field" id="country" aria-label="Country"><option value="">All countries</option></select>
+    <select class="field" id="window" aria-label="Won within">
+      <option value="">Won in last 12 months</option>
+      <option value="180">Won in last 6 months</option>
+      <option value="90">Won in last 90 days</option>
+      <option value="new">New since your last visit</option>
+    </select>
+    <select class="field" id="wins" aria-label="PV contracts won">
+      <option value="">Any number of wins</option>
+      <option value="2">2 or more wins</option>
+      <option value="5">5 or more wins</option>
+    </select>
+    <select class="field" id="size" aria-label="Firm size">
+      <option value="">Any firm size</option>
+      <option value="small">Micro or small</option>
+      <option value="medium">Medium</option>
+      <option value="large">Large</option>
+    </select>
+    <select class="field" id="scope" aria-label="Scope">
+      <option value="">Any scope</option>
+      <option value="storage">With battery storage</option>
+      <option value="carport">Solar carports</option>
+    </select>
+    <select class="field" id="buyer" aria-label="Buyer">
+      <option value="">Any buyer</option>
+      <option value="local">Towns and regions</option>
+      <option value="central">National government</option>
+      <option value="other">Other public bodies</option>
+    </select>
+    <div class="chips" role="group" aria-label="Priority">
+      <button class="chip" type="button" data-pri="High" aria-pressed="true"><span class="dot" style="background:var(--high)"></span>High</button>
+      <button class="chip" type="button" data-pri="Medium" aria-pressed="true"><span class="dot" style="background:var(--med)"></span>Medium</button>
+      <button class="chip" type="button" data-pri="Low" aria-pressed="false"><span class="dot" style="background:var(--low)"></span>Low</button>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <div class="list" role="table" aria-label="Firms that won a public PV contract">
+      <div class="head" role="row">
+        <div role="columnheader"><button type="button" data-sort="score">Priority</button></div>
+        <div role="columnheader"><button type="button" data-sort="name">Firm</button></div>
+        <div role="columnheader"><button type="button" data-sort="won">Latest PV contract</button></div>
+        <div role="columnheader"><button type="button" data-sort="winCount">Wins</button></div>
+        <div role="columnheader"><button type="button" data-sort="eur">Value</button></div>
+      </div>
+      <div id="rows"></div>
+    </div>
+
+    <div class="section-head">
+      <h2>Open PV tenders</h2>
+      <span class="sub" id="t-count"></span>
+    </div>
+    <div class="list" aria-label="Open PV tenders">
+      <div id="tenders"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" id="source"></div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" inert aria-labelledby="d-name">
+  <div class="d-head">
+    <div>
+      <h2 id="d-name"></h2>
+      <div class="sub" id="d-sub"></div>
+      <div class="links" id="d-links"></div>
+    </div>
+    <button class="close" id="close" type="button" aria-label="Close">×</button>
+  </div>
+  <div class="d-body">
+    <div class="facts" id="d-facts"></div>
+    <div class="block">
+      <h3>PV contracts in the last 12 months</h3>
+      <div id="d-deals"></div>
+    </div>
+    <div class="block" id="d-open-block">
+      <h3 id="d-open-title"></h3>
+      <div id="d-open"></div>
+    </div>
+    <h3>Draft email</h3>
+    <div class="compose">
+      <label for="d-subject">Subject</label>
+      <input id="d-subject">
+      <label for="d-body">Message</label>
+      <textarea id="d-body"></textarea>
+      <div class="actions">
+        <button class="pill primary" id="copy" type="button">Copy email</button>
+        <a class="pill light" id="mailto" href="#">Open in mail</a>
+        <span class="copied" id="copied" role="status">Copied</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+const CONFIG = { client: 'Virto Solar', firm: 'Level Equity' };
+
+const ymd = d => [d.getFullYear(), d.getMonth() + 1, d.getDate()].map(n => String(n).padStart(2, '0')).join('-');
+const daysBetween = (a, b) => Math.round((b - new Date(a + 'T00:00:00')) / 864e5);
+const COUNTRY = { AUT: 'Austria', BEL: 'Belgium', BGR: 'Bulgaria', HRV: 'Croatia', CYP: 'Cyprus', CZE: 'Czechia', DNK: 'Denmark',
+  EST: 'Estonia', FIN: 'Finland', FRA: 'France', DEU: 'Germany', GRC: 'Greece', HUN: 'Hungary', IRL: 'Ireland', ITA: 'Italy',
+  LVA: 'Latvia', LTU: 'Lithuania', LUX: 'Luxembourg', MLT: 'Malta', NLD: 'the Netherlands', POL: 'Poland', PRT: 'Portugal',
+  ROU: 'Romania', SVK: 'Slovakia', SVN: 'Slovenia', ESP: 'Spain', SWE: 'Sweden', NOR: 'Norway', CHE: 'Switzerland',
+  GBR: 'the United Kingdom', ISL: 'Iceland', LIE: 'Liechtenstein', MKD: 'North Macedonia', SRB: 'Serbia', ALB: 'Albania',
+  MNE: 'Montenegro', MDA: 'Moldova', UKR: 'Ukraine', TUR: 'Türkiye', BIH: 'Bosnia and Herzegovina', GEO: 'Georgia' };
+const countryName = c => COUNTRY[c] || c || '';
+const countryLabel = c => countryName(c).replace(/^the /, '').replace(/^\w/, x => x.toUpperCase());
+const BUYER = t => /(^|-)(la|ra)$/.test(t) ? 'local' : /cga$/.test(t) ? 'central' : t ? 'other' : '';
+const SIZE = s => ({ micro: 'small', small: 'small', sme: 'small', medium: 'medium', large: 'large' }[s] || '');
+const SIZE_LABEL = { micro: 'Micro firm', small: 'Small firm', sme: 'SME', medium: 'Mid-sized firm', large: 'Large firm' };
+
+// Remembers when this browser last opened the page, for the "New since your last visit" filter.
+// Storage can be blocked; then "new" falls back to the last 7 days.
+// Keeps the previous day's visit through same-day reloads, so the filter doesn't empty on a refresh.
+function lastVisit() {
+  const today = ymd(new Date());
+  try {
+    const v = JSON.parse(localStorage.getItem('pv-tenders-visits') || '{}');
+    const prev = v.last === today ? v.prev : v.last;
+    localStorage.setItem('pv-tenders-visits', JSON.stringify({ prev: prev || null, last: today }));
+    return prev || null;
+  } catch { return null; }
+}
+
+async function loadData() {
+  const res = await fetch('/api/tenders', { signal: AbortSignal.timeout(45000) });
+  if (!res.ok) throw new Error('feed ' + res.status);
+  const data = await res.json();
+  if (!Array.isArray(data.firms) || !Array.isArray(data.tenders)) throw new Error('bad feed');
+  return data;
+}
+
+// Ranks one firm. Only awards attributed to the firm with confidence count: single-winner or single-lot
+// notices ("certain"), and multi-lot notices where the firm is a solar or electrical contractor ("likely").
+function rank(f, today, since) {
+  f.ranked = f.wins.filter(w => w.basis !== 'unclear');
+  f.latest = f.ranked.find(w => w.basis === 'certain' && daysBetween(w.won, today) <= daysBetween(f.ranked[0].won, today) + 45) || f.ranked[0];
+  f.won = f.ranked[0].won;
+  f.daysSinceWin = daysBetween(f.won, today);
+  f.winCount = f.ranked.length;
+  f.eur = f.ranked.reduce((s, w) => s + (w.eur || 0), 0);
+  f.storage = f.ranked.some(w => w.storage);
+  f.carport = f.ranked.some(w => w.carport);
+  f.isNew = f.ranked.some(w => since ? w.pub > since : daysBetween(w.pub, today) <= 7);
+  const recency = Math.max(0, 1 - f.daysSinceWin / 365);
+  const repeat = Math.min(1, (f.winCount - 1) / 5);
+  const size = Math.min(1, Math.sqrt(f.eur / 3e6));
+  f.score = 0.45 * recency + 0.25 * repeat + 0.2 * size + 0.1 * (f.storage || f.carport ? 1 : 0);
+  f.priority = f.score >= 0.55 ? 'High' : f.score >= 0.35 ? 'Medium' : 'Low';
+}
+
+(async () => {
+  const $ = id => document.getElementById(id);
+  $('client-name').textContent = CONFIG.client; $('firm-name').textContent = CONFIG.firm;
+  $('rows').innerHTML = '<div class="empty">Pulling the latest notices from the EU tender database…</div>';
+  let data;
+  try { data = await loadData(); }
+  catch (e) { $('rows').innerHTML = '<div class="empty">The tender data did not load. Refresh the page to try again.</div>'; return; }
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const since = lastVisit();
+  const firms = data.firms.filter(f => f.wins.some(w => w.basis !== 'unclear'));
+  firms.forEach(f => rank(f, today, since));
+  const tenders = data.tenders.filter(t => t.deadline >= ymd(today));
+
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const D = (s, o) => new Date(s + 'T00:00:00').toLocaleDateString('en-US', o);
+  const fmtDate = s => D(s, { month: 'short', day: 'numeric', year: 'numeric' });
+  const longDate = s => D(s, { month: 'long', day: 'numeric' });
+  const monthYear = s => D(s, { month: 'long', year: 'numeric' });
+  const monthOnly = s => D(s, { month: 'long' });
+  const ago = d => d < 1 ? 'today' : d === 1 ? 'yesterday' : d < 60 ? d + ' days ago' : Math.round(d / 30.4) + ' months ago';
+  const eurFmt = v => !v ? '' : v >= 1e6 ? '€' + (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + 'M' : v >= 1e3 ? '€' + Math.round(v / 1e3) + 'K' : '€' + Math.round(v);
+  const kwFmt = kw => kw >= 1000 ? (Math.round(kw / 100) / 10).toLocaleString('en-US') + ' MW' : Math.round(kw).toLocaleString('en-US') + ' kW';
+  const kwhFmt = kwh => kwh >= 1000 ? (Math.round(kwh / 100) / 10).toLocaleString('en-US') + ' MWh' : Math.round(kwh).toLocaleString('en-US') + ' kWh';
+  const ted = id => `https://ted.europa.eu/en/notice/-/detail/${encodeURIComponent(id)}`;
+  // Registries record some names in all caps ("FLEXIPOWER GROUP SP. Z O.O."). Recase only those, keeping
+  // short words and vowel-less words (SP, Z, O.O., ČEZ) in caps; mixed-case names are already right.
+  const tidy = s => { s = String(s || '').trim(); return s !== s.toUpperCase() ? s : s.replace(/\p{Lu}+/gu, (w, i) =>
+    i > 0 && ['OF', 'AND', 'THE', 'DE', 'DU', 'DES', 'LA', 'LE', 'LES', 'ET', 'DI', 'DEL'].includes(w) ? w.toLowerCase()
+    : w.length <= 3 || !/[AEIOUYÁÉÍÓÚÝĚŮÄÖÜĄĘÔΑΕΗΙΟΥΩАЕИОУЪЮЯ]/u.test(w) ? w : w[0] + w.slice(1).toLowerCase()); };
+  firms.forEach(f => { f.display = tidy(f.name); });
+
+  const soon = tenders.filter(t => daysBetween(ymd(today), new Date(t.deadline + 'T00:00:00')) <= 14).length;
+  $('stats').innerHTML = [
+    [firms.length, 'firms won a public PV contract'],
+    [new Set(firms.flatMap(f => f.ranked.map(w => w.id))).size, 'PV contract awards in 12 months'],
+    [tenders.length, 'PV tenders open right now'],
+    [soon, 'tenders closing in 14 days'],
+  ].map(([n, l]) => `<div class="stat"><div class="n">${n.toLocaleString('en-US')}</div><div class="l">${l}</div></div>`).join('');
+  const m = data.meta || {};
+  const fetched = m.fetchedAt ? new Date(m.fetchedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  $('source').textContent = `Source: TED, the EU's public procurement journal. Contract awards with solar PV codes published ${m.from ? fmtDate(m.from) : ''} to ${m.to ? fmtDate(m.to) : ''}, and PV tenders still open. ` +
+    (fetched ? `Fetched ${fetched}${m.source === 'stored' ? ' (TED did not answer, so this is the last good copy)' : ''}. ` : '') +
+    `Values in EUR${m.fxDate ? ' at ECB rates of ' + fmtDate(m.fxDate) : ''}.`;
+
+  const countries = [...new Set([...firms.map(f => f.country), ...tenders.map(t => t.buyerCountry)])].filter(Boolean)
+    .sort((a, b) => countryLabel(a).localeCompare(countryLabel(b)));
+  countries.forEach(c => $('country').insertAdjacentHTML('beforeend', `<option value="${esc(c)}">${esc(countryLabel(c))}</option>`));
+
+  const openIn = c => tenders.filter(t => t.buyerCountry === c);
+  let sortKey = 'score', current = null, tenderLimit = 10;
+  const sortDir = { score: -1, won: -1, winCount: -1, eur: -1, name: 1 };
+  const pri = { High: true, Medium: true, Low: false };
+
+  // The email a Virto rep sends the firm. Every fact comes from the TED record; clauses whose field is
+  // missing are dropped, and capacity is only quoted when the award is clearly this firm's.
+  function message(f) {
+    const w = f.latest, buyer = tidy(w.buyer) || 'a public buyer';
+    const days = daysBetween(w.won, today);
+    const opener = days <= 120
+      ? `Congrats on winning the PV contract with ${buyer} in ${monthOnly(w.won)}.`
+      : `I saw you won the PV contract with ${buyer} in ${monthYear(w.won)}.`;
+    const spec = [];
+    if (w.basis === 'certain' && w.kw) spec.push(`The tender lists ${kwFmt(w.kw)}`);
+    if (w.basis === 'certain' && w.kwh) spec.push(spec.length ? `with ${kwhFmt(w.kwh)} of storage` : `The tender lists ${kwhFmt(w.kwh)} of storage`);
+    else if (w.basis === 'certain' && w.storage) spec.push(spec.length ? 'and battery storage' : 'The tender also covers battery storage');
+    const repeat = f.winCount >= 2 ? ` That makes ${f.winCount} public PV contracts in the last 12 months.` : '';
+    // Only tenders a rep could still act on after sending: at least three days left.
+    const open = openIn(f.country).filter(t => t.buyer !== w.buyer && daysBetween(ymd(today), new Date(t.deadline + 'T00:00:00')) >= 3);
+    const country = countryName(f.country);
+    const next = open[0];
+    const openLine = !open.length || !country ? ''
+      : open.length === 1 ? ` There's also a PV tender open in ${country} right now, closing on ${longDate(next.deadline)}.`
+      : ` There are also ${open.length} PV tenders open in ${country} right now, the next one closing on ${longDate(next.deadline)}.`;
+    const subject = buyer.length <= 45 ? `Your PV contract with ${buyer}` : 'Your recent PV contract win';
+    const body = `Hi {first name},
+
+${opener}${spec.length ? ' ' + spec.join(' ') + '.' : ''}${repeat}${openLine}
+
+A public job comes with a fixed date for layouts, string plans and a bill of materials. Virto.CAD produces engineering-ready PV designs with automated module layouts, shading simulation, automated string plans and a bill of materials export. The design you bid with carries straight into the build, without double work.
+
+Would a 20-minute walkthrough on one of your current projects be useful?
+
+Best,
+{your name}`;
+    return { subject, body };
+  }
+
+  function filtered() {
+    const q = $('q').value.trim().toLowerCase(), c = $('country').value, win = $('window').value;
+    const minWins = +$('wins').value || 0, size = $('size').value, scope = $('scope').value, buyer = $('buyer').value;
+    const list = firms.filter(f =>
+      pri[f.priority] &&
+      (!c || f.country === c) &&
+      (win === 'new' ? f.isNew : !win || f.daysSinceWin <= +win) &&
+      f.winCount >= minWins &&
+      (!size || SIZE(f.size) === size) &&
+      (!scope || f[scope]) &&
+      (!buyer || f.ranked.some(w => BUYER(w.buyerType) === buyer)) &&
+      (!q || [f.name, f.display, ...f.ranked.map(w => w.buyer + ' ' + w.buyerCity)].join(' ').toLowerCase().includes(q)));
+    const dir = sortDir[sortKey];
+    const val = (f, k) => k === 'name' ? f.display.toLowerCase() : f[k];
+    return list.sort((a, b) => { const x = val(a, sortKey), y = val(b, sortKey); return (x > y ? 1 : x < y ? -1 : 0) * dir || b.score - a.score; });
+  }
+
+  const why = f => [
+    `won ${ago(f.daysSinceWin)}`,
+    f.winCount > 1 && `${f.winCount} PV wins in 12 months`,
+    f.eur > 0 && `${eurFmt(f.eur)} in published value`,
+    f.storage && 'storage scope',
+    f.carport && 'carport scope',
+  ].filter(Boolean).join(' · ');
+
+  function render() {
+    const list = filtered();
+    $('count').textContent = `${list.length} of ${firms.length} firms`;
+    const maxEur = Math.max(1, ...firms.map(f => f.eur));
+    $('rows').innerHTML = list.length ? list.map(f => {
+      const w = f.latest;
+      return `<div class="row${current === f ? ' active' : ''}" role="row" tabindex="0" data-id="${esc(f.key)}">
+        <div class="c-pri" role="cell"><span class="badge ${f.priority}"><span class="dot"></span>${f.priority}</span></div>
+        <div class="c-firm" role="cell"><div class="name">${esc(f.display)}${f.isNew ? '<span class="tag new">New</span>' : ''}</div><div class="sub">${esc(countryLabel(f.country))}${SIZE_LABEL[f.size] ? ' · ' + SIZE_LABEL[f.size] : ''}</div><div class="why">${esc(why(f))}</div></div>
+        <div class="c-deal" role="cell"><div class="clip">${esc(tidy(w.buyer))}${w.kw && w.basis === 'certain' ? ` <span class="sub">· ${kwFmt(w.kw)}</span>` : ''}${w.storage ? '<span class="tag teal">Storage</span>' : ''}${w.carport ? '<span class="tag">Carport</span>' : ''}</div><div class="sub">Won ${fmtDate(w.won)} · ${ago(daysBetween(w.won, today))}</div></div>
+        <div class="c-wins" role="cell"><div>${f.winCount} PV contract${f.winCount === 1 ? '' : 's'}</div><div class="sub">last 12 months</div></div>
+        <div class="c-val" role="cell"><div>${f.eur ? eurFmt(f.eur) : '<span class="sub">Not published</span>'}</div><div class="bar"><span style="width:${Math.round(Math.sqrt(f.eur / maxEur) * 100)}%"></span></div></div>
+      </div>`;
+    }).join('') : '<div class="empty">No firms match these filters.</div>';
+    document.querySelectorAll('.head [role="columnheader"]').forEach(h => {
+      const key = h.firstElementChild.dataset.sort;
+      if (key === sortKey) h.setAttribute('aria-sort', sortDir[key] > 0 ? 'ascending' : 'descending'); else h.removeAttribute('aria-sort');
+    });
+    renderTenders();
+  }
+
+  const tenderRow = t => {
+    const left = daysBetween(ymd(today), new Date(t.deadline + 'T00:00:00'));
+    return `<div class="t-row">
+      <div class="t-due"><div class="due${left <= 14 ? ' soon' : ''}">${fmtDate(t.deadline)}</div><div class="sub">${left < 1 ? 'closes today' : 'in ' + left + ' day' + (left === 1 ? '' : 's')}</div></div>
+      <div class="t-buyer"><div class="name">${esc(tidy(t.buyer))}</div><div class="sub">${esc([t.buyerCity, countryLabel(t.buyerCountry)].filter(Boolean).join(', '))}</div></div>
+      <div class="t-title"><div class="sub clip">${esc(t.title)}</div>${t.kw ? `<span class="tag">${kwFmt(t.kw)}</span>` : ''}${t.storage ? '<span class="tag teal">Storage</span>' : ''}${t.carport ? '<span class="tag">Carport</span>' : ''}</div>
+      <div class="t-link"><a href="${ted(t.id)}" target="_blank" rel="noopener">TED notice</a></div>
+    </div>`;
+  };
+  function renderTenders() {
+    const c = $('country').value, list = tenders.filter(t => !c || t.buyerCountry === c);
+    $('t-count').textContent = `${list.length} open${c ? ' in ' + countryName(c) : ''}, closest deadline first`;
+    $('tenders').innerHTML = list.length
+      ? list.slice(0, tenderLimit).map(tenderRow).join('') + (list.length > tenderLimit ? `<button class="more" id="more" type="button">Show all ${list.length}</button>` : '')
+      : '<div class="empty">No open PV tenders here right now.</div>';
+    const more = $('more'); if (more) more.onclick = () => { tenderLimit = Infinity; renderTenders(); };
+  }
+
+  function open(f) {
+    current = f;
+    const msg = message(f);
+    $('d-name').textContent = f.display;
+    $('d-sub').textContent = [countryLabel(f.country), SIZE_LABEL[f.size], f.regId && 'Reg. no. ' + f.regId].filter(Boolean).join(' · ');
+    const li = 'https://www.linkedin.com/search/results/companies/?keywords=' + encodeURIComponent(f.display);
+    $('d-links').innerHTML = `${f.website ? `<a href="${esc(f.website)}" target="_blank" rel="noopener">Website</a>` : ''}<a href="${li}" target="_blank" rel="noopener">Find them on LinkedIn</a><a href="${ted(f.latest.id)}" target="_blank" rel="noopener">Latest TED notice</a>`;
+    const openHere = openIn(f.country);
+    $('d-facts').innerHTML = [
+      [f.winCount, 'PV contracts, 12 months'], [f.eur ? eurFmt(f.eur) : 'Not published', 'published value'], [openHere.length, 'PV tenders open in ' + (countryLabel(f.country) || 'their country')],
+    ].map(([n, l]) => `<div class="fact"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('');
+    $('d-deals').innerHTML = f.wins.map(w => `<div class="deal${w.basis === 'unclear' ? ' unclear' : ''}">
+      <div class="name">${esc(tidy(w.buyer))}${w.storage ? '<span class="tag teal">Storage</span>' : ''}${w.carport ? '<span class="tag">Carport</span>' : ''}</div>
+      <div class="sub clip">${esc(w.title)}</div>
+      <div class="sub">${esc([w.buyerCity, countryLabel(w.buyerCountry)].filter(Boolean).join(', '))} · won ${fmtDate(w.won)}${w.eur && !w.shared ? ' · ' + eurFmt(w.eur) : ''}${w.kw && w.basis === 'certain' ? ' · ' + kwFmt(w.kw) : ''}${w.shared ? ` · shared with other winners${w.basis === 'unclear' ? ', lot not confirmed' : ''}` : ''}${w.lots > 1 ? ` · ${w.lots} lots` : ''}</div>
+      <a href="${ted(w.id)}" target="_blank" rel="noopener">TED notice ${esc(w.id)}</a>
+    </div>`).join('');
+    $('d-open-title').textContent = `Open PV tenders in ${countryLabel(f.country) || 'their country'}`;
+    $('d-open').innerHTML = openHere.length
+      ? openHere.slice(0, 5).map(t => `<div class="deal"><div class="name">${esc(tidy(t.buyer))}</div><div class="sub clip">${esc(t.title)}</div><div class="sub">Closes ${fmtDate(t.deadline)} · <a href="${ted(t.id)}" target="_blank" rel="noopener">TED notice</a></div></div>`).join('')
+        + (openHere.length > 5 ? `<div class="sub">and ${openHere.length - 5} more in the open tenders list</div>` : '')
+      : '<div class="sub">None open right now.</div>';
+    $('d-subject').value = msg.subject;
+    $('d-body').value = msg.body;
+    syncMailto();
+    $('drawer').classList.add('open'); $('scrim').classList.add('open');
+    $('drawer').inert = false;
+    $('drawer').querySelector('.d-body').scrollTop = 0;
+    $('close').focus();
+    render();
+  }
+  function close() {
+    const key = current.key;
+    $('drawer').classList.remove('open'); $('scrim').classList.remove('open');
+    $('drawer').inert = true;
+    current = null; render();
+    [...document.querySelectorAll('.row')].find(r => r.dataset.id === key)?.focus();
+  }
+  function syncMailto() {
+    $('mailto').href = `mailto:?subject=${encodeURIComponent($('d-subject').value)}&body=${encodeURIComponent($('d-body').value)}`;
+  }
+  const byKey = k => firms.find(f => f.key === k);
+
+  $('rows').addEventListener('click', e => { const r = e.target.closest('.row'); if (r) open(byKey(r.dataset.id)); });
+  $('rows').addEventListener('keydown', e => { if (e.key === 'Enter') { const r = e.target.closest('.row'); if (r) open(byKey(r.dataset.id)); } });
+  $('close').onclick = close; $('scrim').onclick = close;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && current) close(); });
+  ['q', 'country', 'window', 'wins', 'size', 'scope', 'buyer'].forEach(id => $(id).addEventListener('input', () => { tenderLimit = 10; render(); }));
+  document.querySelectorAll('.chip').forEach(c => c.onclick = () => { pri[c.dataset.pri] = !pri[c.dataset.pri]; c.setAttribute('aria-pressed', pri[c.dataset.pri]); render(); });
+  document.querySelectorAll('.head button').forEach(btn => btn.onclick = () => { sortKey = btn.dataset.sort; render(); });
+  ['d-subject', 'd-body'].forEach(id => $(id).addEventListener('input', syncMailto));
+
+  async function copyText(text) {
+    let ok = true;
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const t = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.append(t); t.select();
+      try { ok = document.execCommand('copy'); } catch { ok = false; }
+      t.remove();
+    }
+    return ok;
+  }
+  $('copy').onclick = async () => {
+    const ok = await copyText(`Subject: ${$('d-subject').value}\n\n${$('d-body').value}`);
+    $('copied').textContent = ok ? 'Copied' : "Couldn't copy";
+    $('copied').classList.add('show'); setTimeout(() => $('copied').classList.remove('show'), 1500);
+  };
+  $('copy-all').onclick = async () => {
+    const list = filtered();
+    const text = list.map(f => { const x = message(f); return `To: ${f.display}\nSubject: ${x.subject}\n\n${x.body}`; }).join('\n\n----------\n\n');
+    const ok = await copyText(text);
+    const btn = $('copy-all'), label = 'Copy all drafts';
+    btn.textContent = ok ? `Copied ${list.length}` : "Couldn't copy";
+    setTimeout(() => btn.textContent = label, 1600);
+  };
+  $('csv').onclick = () => {
+    const cols = ['Priority', 'Score', 'Firm', 'Country', 'Firm size', 'Registration no.', 'Website', 'PV contracts (12 months)', 'Published value (EUR)', 'Latest buyer', 'Latest won', 'Latest TED notice', 'Storage scope', 'Carport scope', 'Open PV tenders in country', 'Other buyers', 'Email subject', 'Email body'];
+    const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const lines = filtered().map(f => { const w = f.latest, x = message(f); return [f.priority, f.score.toFixed(2), f.display, countryLabel(f.country), SIZE_LABEL[f.size] || '', f.regId, f.website, f.winCount, f.eur || '', tidy(w.buyer), w.won, ted(w.id), f.storage ? 'Yes' : '', f.carport ? 'Yes' : '', openIn(f.country).length, f.ranked.filter(r => r !== w).map(r => tidy(r.buyer)).join('; '), x.subject, x.body].map(q).join(','); });
+    const blob = new Blob([[cols.map(q).join(','), ...lines].join('\n')], { type: 'text/csv' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `pv-tender-winners-${ymd(new Date())}.csv` });
+    a.click(); URL.revokeObjectURL(a.href);
+  };
+  render();
+  window.__tool = { records: firms, message, filtered }; // used by scripts/smoke_test.js
+})();
+</script>
+</body>
+</html>
