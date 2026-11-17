@@ -380,7 +380,7 @@ function rank(f, today, since) {
   const monthOnly = s => D(s, { month: 'long' });
   const ago = d => d < 1 ? 'today' : d === 1 ? 'yesterday' : d < 60 ? d + ' days ago' : Math.round(d / 30.4) + ' months ago';
   const eurFmt = v => !v ? '' : v >= 1e6 ? '€' + (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + 'M' : v >= 1e3 ? '€' + Math.round(v / 1e3) + 'K' : '€' + Math.round(v);
-  const kwFmt = kw => kw >= 1000 ? (Math.round(kw / 100) / 10).toLocaleString('en-US') + ' MW' : Math.round(kw).toLocaleString('en-US') + ' kW';
+  const kwFmt = kw => kw >= 1000 ? (Math.round(kw / 100) / 10).toLocaleString('en-US') + ' MW' : (kw < 10 ? Math.round(kw * 10) / 10 : Math.round(kw)).toLocaleString('en-US') + ' kW';
   const kwhFmt = kwh => kwh >= 1000 ? (Math.round(kwh / 100) / 10).toLocaleString('en-US') + ' MWh' : Math.round(kwh).toLocaleString('en-US') + ' kWh';
   const ted = id => `https://ted.europa.eu/en/notice/-/detail/${encodeURIComponent(id)}`;
   // Registries record some names in all caps ("FLEXIPOWER GROUP SP. Z O.O."). Recase only those, keeping
