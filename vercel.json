@@ -1,3 +1,5 @@
 {
+  "buildCommand": "node build.mjs",
+  "outputDirectory": "dist",
   "regions": ["fra1"]
 }

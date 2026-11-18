@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PV Tender Winners</title>
+<meta name="description" content="European firms that just won a public contract to build solar PV, ranked, with open PV tenders and a draft email for each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tool.css">
+<style>
+  /* Sampled from virto.solar: royal blue, deep navy, orange calls to action, Poppins, 6px corners, caps buttons. */
+  :root {
+    --font: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    --ink: #141414; --ink-3: #676c80; --line: #e3e6ef; --wash: #f4f6fb; --card: #fff;
+    --link: #0b31ad; --accent: #0b31ad; --accent-ink: #0b31ad; --accent-wash: #e9eefc;
+    --primary: #f97316; --primary-hover: #ea620a; --primary-ink: #fff;
+    --hero-bg: linear-gradient(160deg, #0b1430 0%, #0c2275 55%, #0b31ad 100%);
+    --hero-ink: #fff; --hero-sub: rgba(255,255,255,.8); --hero-soft: rgba(255,255,255,.8);
+    --hero-btn-line: rgba(255,255,255,.4); --hero-btn-hover: #fff;
+    --stat-bg: rgba(255,255,255,.07); --stat-line: rgba(255,255,255,.14);
+    --display-weight: 800; --display-tracking: -1.6px;
+    --btn-radius: 6px; --btn-weight: 700; --btn-size: 13px; --btn-tracking: .8px; --btn-case: uppercase; --btn-border: 2px;
+    --field-radius: 6px; --radius: 10px;
+    --filters-bg: rgba(244,246,251,.94); --hover: #f6f8ff; --active: #edf1fd;
+    --high: #0b31ad; --high-ink: #0b31ad; --med: #1d9bbd; --med-ink: #157f9c; --low: #b5bacb;
+    --tag-bg: #e9eefc; --tag-ink: #0b31ad; --tag2-bg: #e3f6fa; --tag2-ink: #127893;
+    --bar-bg: #e8ebf4; --bar: linear-gradient(90deg, #0b31ad, #22b8d6);
+    --drawer-bg: linear-gradient(160deg, #0b1430, #0b31ad); --drawer-ink: #fff; --drawer-sub: rgba(255,255,255,.75);
+    --drawer-link: #9fe3f2; --close-bg: rgba(255,255,255,.12); --deal-line: #22b8d6;
+  }
+</style>
+</head>
+<body>
+<script src="tool.js"></script>
+<script>
+const kwFmt = kw => kw >= 1000 ? (Math.round(kw / 100) / 10).toLocaleString('en-US') + ' MW'
+  : (kw < 10 ? Math.round(kw * 10) / 10 : Math.round(kw)).toLocaleString('en-US') + ' kW';
+const kwhFmt = kwh => kwh >= 1000 ? (Math.round(kwh / 100) / 10).toLocaleString('en-US') + ' MWh' : Math.round(kwh).toLocaleString('en-US') + ' kWh';
+
+Tool.mount({
+  name: 'virto', client: 'Virto Solar', firm: 'Level Equity', csvName: 'pv-tender-winners',
+  heroArt: `<svg class="lines" viewBox="0 0 1440 560" preserveAspectRatio="none" aria-hidden="true">
+    <polyline points="900,-10 1010,140 1440,140" fill="none" stroke="#22b8d6" stroke-width="2"/>
+    <polyline points="1160,560 1300,330 1440,250" fill="none" stroke="#22b8d6" stroke-width="2"/></svg>`,
+  hero: {
+    title: 'Installers that just won a public solar contract.',
+    lede: "A public PV contract comes with a deadline for layouts, string plans and a bill of materials the buyer will sign off. These are the European firms that won one in the last 12 months. The list comes from the EU tender database each time you open this page, ranked by how recent, frequent and large each firm's wins are, with a draft email for each.",
+  },
+  noun: { contract: 'PV contract', contracts: 'PV contracts', tenders: 'PV tenders', listLabel: 'Firms that won a public PV contract' },
+  tags: {
+    storage: { label: 'Storage', filter: 'With battery storage', why: 'storage scope', alt: true },
+    carport: { label: 'Carport', filter: 'Solar carports', why: 'carport scope' },
+  },
+  spec: w => w.kw ? kwFmt(w.kw) : '',
+  stats: ({ firms, tenders, daysTo }) => [
+    [firms.length, 'firms won a public PV contract'],
+    [new Set(firms.flatMap(f => f.ranked.map(w => w.id))).size, 'PV contract awards in 12 months'],
+    [tenders.length, 'PV tenders open right now'],
+    [tenders.filter(t => daysTo(t.deadline) <= 14).length, 'tenders closing in 14 days'],
+  ],
+  source: (m, h) => `Source: TED, the EU's public procurement journal. Contract awards with solar PV codes published ${m.from ? h.fmtDate(m.from) : ''} to ${m.to ? h.fmtDate(m.to) : ''}, and PV tenders still open.`,
+  // The email a Virto rep sends the firm. Every fact comes from the TED record; clauses whose field is
+  // missing are dropped, and capacity is only quoted when the award is clearly this firm's.
+  message(f, h) {
+    const w = f.latest, buyer = h.tidy(w.buyer) || 'a public buyer';
+    const opener = h.daysBetween(w.won, h.today) <= 120
+      ? `Congrats on winning the PV contract with ${buyer} in ${h.monthOnly(w.won)}.`
+      : `I saw you won the PV contract with ${buyer} in ${h.monthYear(w.won)}.`;
+    const spec = [];
+    if (w.basis === 'certain' && w.kw) spec.push(`The tender lists ${kwFmt(w.kw)}`);
+    if (w.basis === 'certain' && w.kwh) spec.push(spec.length ? `with ${kwhFmt(w.kwh)} of storage` : `The tender lists ${kwhFmt(w.kwh)} of storage`);
+    else if (w.basis === 'certain' && w.storage) spec.push(spec.length ? 'and battery storage' : 'The tender also covers battery storage');
+    const repeat = f.winCount >= 2 ? ` That makes ${f.winCount} public PV contracts in the last 12 months.` : '';
+    const open = h.openIn(f.country, w.buyer), country = h.countryName(f.country);
+    const openLine = !open.length || !country ? ''
+      : open.length === 1 ? ` There's also a PV tender open in ${country} right now, closing on ${h.longDate(open[0].deadline)}.`
+      : ` There are also ${open.length} PV tenders open in ${country} right now, the next one closing on ${h.longDate(open[0].deadline)}.`;
+    return {
+      subject: buyer.length <= 45 ? `Your PV contract with ${buyer}` : 'Your recent PV contract win',
+      body: `Hi {first name},
+
+${opener}${spec.length ? ' ' + spec.join(' ') + '.' : ''}${repeat}${openLine}
+
+A public job comes with a fixed date for layouts, string plans and a bill of materials. Virto.CAD produces engineering-ready PV designs with automated module layouts, shading simulation, automated string plans and a bill of materials export. The design you bid with carries straight into the build, without double work.
+
+Would a 20-minute walkthrough on one of your current projects be useful?
+
+Best,
+{your name}`,
+    };
+  },
+});
+</script>
+</body>
+</html>

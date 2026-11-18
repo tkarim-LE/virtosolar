@@ -33,7 +33,7 @@ check('TED down, nothing stored: 503 not cached', r.status === 503 && r.cache ==
 mode = 'ok'; r = await call();
 check('live pull served and stored', r.status === 200 && r.body.meta.source === 'live' && stored?.firms?.length > 100, `${r.body.meta?.firms} firms, stored ${stored?.firms?.length}`);
 mode = 'down'; r = await call();
-check('TED down: stored copy served', r.status === 200 && r.body.meta.source === 'stored' && r.body.firms.length === stored.firms.length && /TED did not respond/.test(r.body.meta.warning), r.body.meta.warning);
+check('TED down: stored copy served', r.status === 200 && r.body.meta.source === 'stored' && r.body.firms.length === stored.firms.length && /did not respond/.test(r.body.meta.warning), r.body.meta.warning);
 check('stored copy cached briefly', /s-maxage=120/.test(r.cache), r.cache);
 const before = stored.meta.fetchedAt;
 mode = 'partial'; r = await call();

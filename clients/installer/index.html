@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rollout Winners</title>
+<meta name="description" content="Firms that just won a public EV charging or heat pump rollout in Europe or the UK, and heat pump brands with new EU models, ranked with a draft email for each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tool.css">
+<style>
+  /* Sampled from installer.com: light grey canvas, near-black type, signal green outlines, Inter, 8px corners. */
+  :root {
+    --font: Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --ink: #1a1a1a; --ink-3: #6d6d6d; --line: #e6e6e6; --wash: #fafafa; --card: #fff;
+    --link: #1a1a1a; --accent: #3fe71b; --accent-ink: #1a1a1a; --accent-wash: rgba(63,231,27,.12);
+    --primary: #1a1a1a; --primary-hover: #000; --primary-ink: #fff;
+    --hero-bg: linear-gradient(180deg, #fafafa 0%, #ececec 100%);
+    --hero-ink: #1a1a1a; --hero-sub: #6d6d6d; --hero-soft: #a3a3a3;
+    --hero-btn-line: #3fe71b; --hero-btn-hover: #1a1a1a;
+    --stat-bg: #fff; --stat-line: rgba(0,0,0,.08);
+    --display-weight: 600; --display-tracking: -2px;
+    --btn-radius: 8px; --btn-weight: 500; --btn-size: 15px; --btn-tracking: -.18px; --btn-case: none; --btn-border: 1px;
+    --field-radius: 8px; --radius: 12px;
+    --filters-bg: rgba(250,250,250,.94); --hover: #f6f6f6; --active: #f0fbec;
+    --high: #3fe71b; --high-ink: #1b7d06; --med: #9a9a9a; --med-ink: #4a4a4a; --low: #d6d6d6;
+    --tag-bg: rgba(63,231,27,.16); --tag-ink: #1b6e07; --tag2-bg: #fff1dc; --tag2-ink: #8a5300;
+    --bar-bg: #ececec; --bar: linear-gradient(90deg, #1a1a1a, #3fe71b);
+    --drawer-bg: #fafafa; --drawer-ink: #1a1a1a; --drawer-sub: #6d6d6d; --drawer-link: #1a1a1a; --close-bg: #ececec; --deal-line: #3fe71b;
+  }
+</style>
+</head>
+<body>
+<script src="tool.js"></script>
+<script>
+// What the contract covers, from words in the notice. Mixed programmes are common, so it's "includes".
+const covers = w => w.ev && w.heatpump ? ', which includes EV charger and heat pump installs' : w.heatpump ? ', which includes heat pump installs' : w.ev ? ', which includes EV charger installs' : '';
+const PITCH = 'Installer.com connects your orders to a network of vetted installer companies, automates the compliance paperwork and pays installers on Day Zero';
+
+Tool.mount({
+  name: 'installer', client: 'Installer.com', firm: 'Level Equity', csvName: 'rollout-winners',
+  hero: {
+    title: 'Firms that just won a public EV charging or heat pump rollout.',
+    lede: 'A public rollout means crews at every site, compliance paperwork for each job and a fixed date to finish. These are the utilities, charge point operators and contractors in Europe and the UK that won one in the last 12 months. The list comes from TED and the UK\'s two tender sites each time you open this page, ranked by how recent, frequent and large each firm\'s wins are, with a draft email for each.',
+  },
+  noun: { contract: 'rollout contract', contracts: 'rollout contracts', tenders: 'rollout tenders', listLabel: 'Firms that won a public EV charging or heat pump rollout' },
+  tags: {
+    ev: { label: 'EV charging', filter: 'EV charging' },
+    heatpump: { label: 'Heat pumps', filter: 'Heat pumps', alt: true },
+  },
+  spec: w => w.points ? `${w.points.toLocaleString('en-US')} ${w.points === 1 ? w.pointsUnit.replace(/s$/, '') : w.pointsUnit}` : '',
+  // Rollout size counts for the 10% scope share of the score: 50 sites or charge points scores full.
+  scopeScore: f => Math.min(1, Math.max(0, ...f.ranked.map(w => (w.basis === 'certain' && w.points) || 0)) / 50),
+  stats: ({ firms, tenders, data, daysTo }) => [
+    [firms.length, 'firms won a public rollout'],
+    [new Set(firms.flatMap(f => f.ranked.map(w => w.id))).size, 'rollout contracts in 12 months'],
+    [tenders.length, 'rollout tenders open right now'],
+    data.brands?.length ? [data.brands.length, 'heat pump brands with new EU models'] : [tenders.filter(t => daysTo(t.deadline) <= 14).length, 'tenders closing in 14 days'],
+  ],
+  source: (m, h) => `Sources: TED (EU and EEA), and the UK's Contracts Finder and Find a Tender, for contract awards for EV charging and heat pumps published ${m.from ? h.fmtDate(m.from) : ''} to ${m.to ? h.fmtDate(m.to) : ''}, and tenders still open.`
+    + (m.eprel?.since ? ` EPREL heat pump registrations since ${h.fmtDate(m.eprel.since)}.` : ''),
+  // The email an Installer.com rep sends the firm. Every fact comes from the notice; missing fields drop out.
+  message(f, h) {
+    const w = f.latest, buyer = h.tidy(w.buyer) || 'public';
+    const opener = h.daysBetween(w.won, h.today) <= 120
+      ? `Congrats on winning the ${buyer} contract in ${h.monthOnly(w.won)}${covers(w)}.`
+      : `I saw you won the ${buyer} contract in ${h.monthYear(w.won)}${covers(w)}.`;
+    const size = w.basis === 'certain' && w.points ? ` The notice lists ${w.points.toLocaleString('en-US')} ${w.pointsUnit}.` : '';
+    const repeat = f.winCount >= 2 ? ` That makes ${f.winCount} public rollout contracts in the last 12 months.` : '';
+    const open = h.openIn(f.country, w.buyer), country = h.countryName(f.country);
+    const openLine = !open.length || !country ? ''
+      : open.length === 1 ? ` There's also a similar tender open in ${country} right now, closing on ${h.longDate(open[0].deadline)}.`
+      : ` There are also ${open.length} similar tenders open in ${country} right now, the next one closing on ${h.longDate(open[0].deadline)}.`;
+    return {
+      subject: buyer.length <= 45 ? `Installing the ${buyer} rollout` : 'Installing your new rollout',
+      body: `Hi {first name},
+
+${opener}${size}${repeat}${openLine}
+
+A rollout like this is mostly an installation problem, with crews needed at every site, compliance paperwork for each job and someone chasing the schedule. ${PITCH}, so you can add capacity region by region without hiring for it.
+
+Would a 20-minute walkthrough be useful before the first sites go live?
+
+Best,
+{your name}`,
+    };
+  },
+
+  // Heat pump brands with new EU models (EPREL). Shown only when the feed has them.
+  extend(data, h) {
+    const brands = (data.brands || []).map(b => ({ ...b, latest: b.models[0], display: h.tidy(b.brand) }))
+      .sort((a, b) => b.latest.date.localeCompare(a.latest.date) || b.models.length - a.models.length);
+    if (!brands.length) return;
+    const markets = m => m.markets === 'ALL' ? 'every EU country' : h.list(m.markets.map(h.countryLabel));
+    const brandMessage = b => {
+      const m = b.latest, n = b.models.length, first = b.models[n - 1];
+      const marketLine = m.markets === 'ALL' ? '' : ` It's listed for sale in ${h.list(m.markets.slice(0, 4).map(h.countryName))}${m.markets.length > 4 ? ' and more' : ''}.`;
+      return {
+        subject: `Installing ${b.display}'s new heat pumps`,
+        body: `Hi {first name},
+
+I saw ${b.display} put ${n === 1 ? 'a new heat pump' : n + ' new heat pump models'} on the EU market ${n === 1 ? 'in ' + h.monthYear(m.date) : 'since ' + h.monthYear(first.date) + ', most recently ' + m.model + ' in ' + h.monthOnly(m.date)}.${marketLine}
+
+Selling the product is the easy part. Each new market needs certified installers lined up before the first order. ${PITCH}, so you can enter a new market without building an installation team first.
+
+Would a 20-minute look at how brands like Zaptec and Easee run their installs be useful?
+
+Best,
+{your name}`,
+      };
+    };
+    let limit = 10;
+    const wrap = document.getElementById('extra');
+    const render = () => {
+      wrap.innerHTML = `<div class="section-head"><h2>Heat pump brands with new EU models</h2><span class="sub">${brands.length} brands, newest launch first</span></div>
+        <div class="list" aria-label="Heat pump brands with new EU models">${brands.slice(0, limit).map(b => `
+          <div class="b-row${h.isOpen(b.key) ? ' active' : ''}" tabindex="0" data-id="${h.esc(b.key)}">
+            <div><div class="name">${h.esc(b.display)}</div><div class="sub">${h.esc([b.org !== b.brand && b.org, h.countryLabel(b.country)].filter(Boolean).join(' · '))}</div></div>
+            <div><div class="clip">${h.esc(b.latest.model)}</div><div class="sub">On the market ${h.fmtDate(b.latest.date)}</div></div>
+            <div><div>${b.models.length} new model${b.models.length === 1 ? '' : 's'}</div><div class="sub">last 12 months</div></div>
+            <div class="sub clip">${h.esc(markets(b.latest))}</div>
+          </div>`).join('')}${brands.length > limit ? `<button class="more" id="b-more" type="button">Show all ${brands.length}</button>` : ''}</div>`;
+      const more = document.getElementById('b-more'); if (more) more.onclick = () => { limit = Infinity; render(); };
+    };
+    const open = b => h.openDrawer({
+      key: b.key, title: b.display, sub: [b.org !== b.brand && b.org, h.countryLabel(b.country)].filter(Boolean).join(' · '),
+      links: [b.website && ['Website', /^https?:/.test(b.website) ? b.website : 'https://' + b.website], ['Find them on LinkedIn', 'https://www.linkedin.com/search/results/companies/?keywords=' + encodeURIComponent(b.display)], ['Latest EPREL record', b.latest.url]].filter(Boolean),
+      facts: [[b.models.length, 'new heat pump models'], [h.fmtDate(b.latest.date), 'latest on the market'], [b.latest.markets === 'ALL' ? 'All EU' : b.latest.markets.length, 'markets for the latest']],
+      sections: [{ title: 'New heat pump models in the last 12 months', html: b.models.map(m => h.deal(h.esc(m.model), [
+        [`On the market ${h.fmtDate(m.date)}`, m.energyClass && 'class ' + m.energyClass.replace(/P/g, '+'), 'sold in ' + markets(m)].filter(Boolean).join(' · '),
+      ], m.url, 'EPREL ' + m.id)).join('') }],
+      message: brandMessage(b),
+    });
+    wrap.addEventListener('click', e => { const r = e.target.closest('.b-row'); if (r) open(brands.find(b => b.key === r.dataset.id)); });
+    wrap.addEventListener('keydown', e => { if (e.key === 'Enter') { const r = e.target.closest('.b-row'); if (r) open(brands.find(b => b.key === r.dataset.id)); } });
+    this.renderExtra = render;
+    render();
+  },
+});
+</script>
+</body>
+</html>
